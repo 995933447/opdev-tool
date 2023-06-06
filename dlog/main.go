@@ -96,21 +96,15 @@ func main() {
 
 	fmt.Println("cached file:" + tmpFp.Name())
 
-	fmt.Println("cat", strings.ReplaceAll(tmpFp.Name(), "\\", "/")+"|grep -a \""+*keyword+"\"|sort -k4")
+	fmt.Println("cat", strings.ReplaceAll(tmpFp.Name(), "\\", "/")+"|sort -k4")
 
 	catCmd := exec.Command("cat", strings.ReplaceAll(tmpFp.Name(), "\\", "/"))
-	grepCmd := exec.Command("grep", "-a", *keyword)
 	sortCmd := exec.Command("sort", "-k4")
 	catCmd.Stderr = &bytes.Buffer{}
-	grepCmd.Stderr = &bytes.Buffer{}
 	sortCmd.Stderr = &bytes.Buffer{}
 	sortCmd.Stdout = &bytes.Buffer{}
 
-	grepCmd.Stdin, err = catCmd.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-	sortCmd.Stdin, err = grepCmd.StdoutPipe()
+	sortCmd.Stdin, err = catCmd.StdoutPipe()
 	if err != nil {
 		panic(err)
 	}
@@ -119,10 +113,6 @@ func main() {
 	if err != nil {
 		//panic(err.Error() + ":" + sortCmd.Stderr.(*bytes.Buffer).String())
 	}
-	err = grepCmd.Start()
-	if err != nil {
-		//panic(err.Error() + ":" + grepCmd.Stderr.(*bytes.Buffer).String())
-	}
 	err = catCmd.Run()
 	if err != nil {
 		//panic(err.Error() + ":" + catCmd.Stderr.(*bytes.Buffer).String())
@@ -130,10 +120,6 @@ func main() {
 	err = sortCmd.Wait()
 	if err != nil {
 		//panic(err.Error() + ":" + sortCmd.Stderr.(*bytes.Buffer).String())
-	}
-	err = grepCmd.Wait()
-	if err != nil {
-		//panic(err.Error() + ":" + grepCmd.Stderr.(*bytes.Buffer).String())
 	}
 
 	fmt.Println(sortCmd.Stdout.(*bytes.Buffer).String())
