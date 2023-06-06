@@ -16,7 +16,7 @@ import (
 
 // Please set queriable log host ENV DLOG_DIALS=user:password@host:port,user2:password2@host2:port2
 func main() {
-	timeSeq := flag.String("t", time.Now().Format("0102"), "日志日期,如0601")
+	timeSeq := flag.String("t", time.Now().Format("2006010215"), "日志日期,如0601")
 	keyword := flag.String("k", "", "关键字")
 	flag.Parse()
 
@@ -24,21 +24,6 @@ func main() {
 		flag.Usage()
 		return
 	}
-
-	var fNameSuffix string
-	switch true {
-	case len(*timeSeq) == 1:
-		fNameSuffix = time.Now().Format("01-0") + *timeSeq
-	case len(*timeSeq) == 2:
-		fNameSuffix = time.Now().Format("01-") + *timeSeq
-	case len(*timeSeq) == 3:
-		fNameSuffix = fmt.Sprintf("0%s-%s", (*timeSeq)[0:1], (*timeSeq)[1:])
-	case len(*timeSeq) == 4:
-		fNameSuffix = fmt.Sprintf("%s-%s", (*timeSeq)[0:2], (*timeSeq)[2:4])
-	default:
-		fNameSuffix = time.Now().Format("01-02")
-	}
-	fNameSuffix += ".log"
 
 	tmpFp, err := os.CreateTemp("", "dlog")
 	if err != nil {
@@ -90,7 +75,7 @@ func main() {
 
 			var b bytes.Buffer
 			session.Stdout = &b
-			cmd := fmt.Sprintf(". ~/.bash_profile; cat ${TLOGDIR}*.%s|grep %s", fNameSuffix, *keyword)
+			cmd := fmt.Sprintf(". ~/.bash_profile; tlog.sh -t %s %s", *timeSeq, *keyword)
 			fmt.Println("run:" + cmd + " from " + components[1])
 			if err := session.Run(cmd); err != nil {
 				panic("Failed to run: " + err.Error())
