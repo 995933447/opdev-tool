@@ -78,12 +78,20 @@ func main() {
 			cmd := fmt.Sprintf(". ~/.bash_profile; tlog.sh -t %s %s", *timeSeq, *keyword)
 			fmt.Println("run:" + cmd + " from " + components[1])
 			if err := session.Run(cmd); err != nil {
-				panic("Failed to run: " + err.Error())
+				fmt.Println("Failed to run: " + cmd + " from " + components[1] + ", error:" + err.Error())
 			}
+
+			ip := strings.Split(components[1], ":")[0]
+			lines := strings.Split(b.String(), "\n")
 
 			appendContentMu.Lock()
 			defer appendContentMu.Unlock()
-			content += b.String()
+			for _, l := range lines {
+				if len(l) == 0 {
+					continue
+				}
+				content = content + fmt.Sprintln("["+ip+"]"+l)
+			}
 		}(dial)
 	}
 
